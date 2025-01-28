@@ -1,0 +1,221 @@
+---
+title: "Homework 2"
+class: "SDS 315"
+author: "Emma Chung"
+date: "2025-01-21"
+Github: 
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE, warning = FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(kableExtra)
+library(dplyr)
+```
+
+# Problem 1: Beauty, or not, in the classroom
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+prof <- read_csv("profs.csv")
+```
+
+## Part A
+
+```{r, echo=FALSE, message = FALSE}
+ggplot(prof, aes(x= eval)) + geom_histogram(fill = "chocolate2") + labs(title = "Histogram of Professor Teaching Evaluation Scores Distribution", x = "Evaluation Score", y = "frequency")
+```
+
+The mean of the evaluation score is `r round(mean(prof$eval), 2)` and the median is `r median(prof$eval)`. The histogram is skewed to the left.
+
+## Part B
+
+```{r, echo = FALSE}
+ggplot(prof, aes(x=eval)) + geom_boxplot() + facet_wrap(~native) + 
+  labs(title = "Native and non-Native Professor Evaluation Scores", 
+       x = "Evaluation Score")
+```
+
+```{r, echo = FALSE}
+prof_native <- prof %>% 
+  filter(
+    native == "yes"
+  )
+prof_nonnative <- prof %>% 
+  filter(native == "no")
+```
+
+The mean evaluation score of native English speaker is `r mean(prof_native$eval)`, whereas the mean of non-native English speaker is `r round(mean(prof_nonnative$eval), 2)`. The evaluation score range of native English speaker is `r round((max(prof_native$eval)-min(prof_native$eval)), 2) `, whereas the range of non-native English speaker is `r round((max(prof_nonnative$eval)-min(prof_nonnative$eval)), 2) `.
+
+## Part C
+
+```{r, echo = FALSE, message = FALSE}
+ggplot(prof, aes(x = eval, fill = gender)) + geom_histogram(position = "identity") + scale_fill_manual(values = c("lightpink1", "cornflowerblue")) + labs(title = "Evaluation Scores among 2 Genders", x = "Evaluation Score", y = "frequency") + facet_wrap(~gender, nrow = 2)
+```
+
+```{r, echo = FALSE}
+prof_male <- prof %>% 
+  filter(gender == "male")
+prof_female <- prof %>% 
+  filter(gender == "female")
+```
+
+The mean evaluation score of male professors is `r round(mean(prof_male$eval), 2)`, whereas the mean of female professors is `r round(mean(prof_female$eval), 2)`. The median evaluation score of male professors is `r median(prof_male$eval)`, whereas the median of female professors is `r round(median(prof_female$eval), 2)`. 
+
+## Part D
+
+```{r, echo = FALSE}
+ggplot(prof, aes(x = beauty, y = eval)) + geom_point() + 
+  labs("Relationship between Physical Attractiveness and Course Evaluation", 
+       x = "Physical Attractiveness", 
+       y = "Course Evaluation Score")
+```
+
+The correlation of physical attractiveness and course evaluation score is `r round(cor(prof$beauty, prof$eval), 2)`
+
+# Problem 2
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+bike <- read_csv("bikeshare.csv")
+```
+
+## Plot A
+
+```{r, echo = FALSE}
+bike <- bike %>% 
+  mutate(workingday_yn = ifelse(workingday == 1, "Yes", "No"))
+
+rent_total <- bike %>% 
+  group_by(hr) %>% 
+  summarize(
+    count = round(mean(total), 2)
+  )
+ggplot(rent_total, aes(x=hr, y = count)) + geom_line() + labs(title = "Average Hourly Rentals across All Hours of Day", x = "Time", y = "Rental Count")
+```
+
+The peak average rentals occurs at 8 a.m and 5 p.m. and it aligns with the time when people enter and leave office.
+
+## Plot B
+
+```{r, echo = FALSE, message = FALSE}
+rental_total_byweek <- bike %>% 
+  group_by(hr, workingday_yn) %>% 
+  summarize(
+    average = round(mean(total), 2)
+  )
+ggplot(rental_total_byweek, aes(x=hr, y = average)) + geom_line() + labs(title = "Average Hourly Rentals across All Hours of Day on Working Day or not", x = "Time", y = "Rental Count", color = "Working Day?") + facet_wrap(~workingday_yn)
+```
+
+The peak for workdays occurs at 8 a.m. and 5 p.m. and for non-work days it's at 1 p.m.
+
+## Plot C
+
+```{r, echo = FALSE, message = FALSE}
+bike_c <- bike %>% 
+  filter(hr == 9) %>% 
+  group_by(weathersit, workingday_yn) %>% 
+  summarize(count = round(mean(total), 2))
+ggplot(bike_c, aes(x = weathersit, y = count, fill = workingday_yn)) +geom_bar(stat = 'identity') + labs(title = "Average Ridership under Different Weather Situation and Days", x = "Weather Situation", y = "Bike Rental Count", fill = "Working Day?") + facet_wrap(~workingday_yn) + scale_fill_manual(values = c("khaki2", "plum4"))
+```
+
+On working days, approximately the same number of people use the bike on clear weather and misty weather. However, less people use the bikes on non-working days when it is misty.
+
+# Problem 3
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+capmetro <- read_csv("capmetro_UT.csv")
+```
+
+## Task 1
+
+```{r, echo = FALSE, message = FALSE}
+capmetro = mutate(capmetro,
+  day_of_week = factor(day_of_week,
+  levels=c("Mon", "Tue", "Wed","Thu", "Fri", "Sat", "Sun")),
+  month = factor(month,
+  levels=c("Sep", "Oct","Nov")))
+capmetro_avg <- capmetro %>% 
+  group_by(hour_of_day, month, day_of_week) %>% 
+  summarize(avg = round(mean(boarding), 2))
+ggplot(capmetro_avg, aes(x= hour_of_day, y= avg, color = month)) + geom_line() + facet_wrap(~day_of_week) + labs(title = "Average Boarding by Days in Different Months", x= "Hour of Day", y = "Average Boardings")
+```
+
+On weekdays, hour of peak is approximately the same. As for weekends, there are no significant peaks in both days. For September, Labor Day is on Monday so on that day there's less people using the bus so adding together there's less boarding count. For November on Wednesday, Thursday and Friday, thanksgiving occurs and people stay at home therefore use less bus. 
+
+
+## Task 2
+
+```{r, echo = FALSE}
+ggplot(capmetro, aes(x= temperature, y= boarding, color = weekend)) + geom_point() + facet_wrap(~hour_of_day)
+```
+
+The graph shows the relationship between temperature and the number of boarding people by the hour on both weekdays and weekends. There is significantly more people using the metro on weekdays throughout the day. And temperature doesn't really affect the number of people using the bus.
+
+# Problem 4
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+billboard <- read_csv("billboard.csv")
+```
+
+## Part A
+
+```{r, echo = FALSE, message = FALSE}
+billboard_top <- billboard %>% 
+  group_by(song, performer) %>% 
+  summarize(
+    count = n()
+  ) %>% 
+  arrange(desc(count))
+billboard_top <- head(billboard_top, 10)
+
+my_table <- head(billboard_top, 10)
+my_table <- as_tibble(my_table)
+colnames(my_table) <- c("song", "performer", "count")
+my_table <- kable(my_table)
+my_table <- kable_styling(my_table)
+my_table
+```
+
+Ten songs that stayed on Billboard the longest is shown in the table above.
+
+## Part B
+
+```{r, echo = FALSE}
+billboard_diversity <- billboard %>% 
+  filter(year!= 1958 & year != 2021) %>% 
+  distinct(year, song) %>% 
+  group_by(year) %>% 
+  summarize(
+    count = n()
+  )
+
+ggplot(billboard_diversity, aes(x = year, y = count)) + geom_line() + labs(title = "Unique Songs that Entered Top 100 throughout the Years")
+```
+
+The number of unique songs reached the lowest point near 2000, and generally increase since then.
+
+## Part C
+
+```{r, echo = FALSE, message = FALSE}
+billboard_weeks <- billboard %>% 
+  group_by(song, performer) %>% 
+  summarize(
+    week_count = n()
+  ) %>% 
+  filter(week_count >= 10)
+
+billboard_tenweekhit <- billboard_weeks %>% 
+  group_by(performer) %>% 
+  summarize(
+    songs = n()
+  ) %>% 
+  filter(songs >= 30)
+
+ggplot(billboard_tenweekhit, aes(x=performer, y=songs)) + geom_bar(stat = "identity") + labs(title = "Artists that have over 30 Songs Reached 10 Week Hit", x = "Performer", y = "Number of Ten-Week Hit Songs") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+19 artists in the history achieved the 10 week hit on Billboard. Among all the artists, Elton John has the most songs that hit the record.
