@@ -153,7 +153,7 @@ The graph showcases the hourly average boardings in every day in a week coloring
 ggplot(capmetro, aes(x= temperature, y= boarding, color = weekend)) + geom_point() + facet_wrap(~hour_of_day)
 ```
 
-```{r}
+```{r, echo = FALSE}
 capmetro_cor <- capmetro %>% 
   group_by(hour_of_day) %>% 
   summarize(cor = cor(temperature, boarding))
