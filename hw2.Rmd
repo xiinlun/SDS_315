@@ -1,14 +1,14 @@
 ---
 title: "Homework 2"
-class: "SDS 315"
-author: "Emma Chung"
+author: "Emma Chung (hc33293)"
 date: "2025-01-21"
-Github: 
 output:
   pdf_document: default
   html_document:
     df_print: paged
 ---
+
+Github link: https://github.com/xiinlun/SDS_315 (Click here)
 
 ```{r setup, include=FALSE, warning = FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -30,7 +30,7 @@ prof <- read_csv("profs.csv")
 ggplot(prof, aes(x= eval)) + geom_histogram(fill = "chocolate2") + labs(title = "Histogram of Professor Teaching Evaluation Scores Distribution", x = "Evaluation Score", y = "frequency")
 ```
 
-The mean of the evaluation score is `r round(mean(prof$eval), 2)` and the median is `r median(prof$eval)`. The histogram is skewed to the left.
+The histogram displays the course evaluation scores among all professors. The mean of the evaluation score is `r round(mean(prof$eval), 3)` and the median is `r round(median(prof$eval), 5)`. The histogram is skewed to the left, meaning more professors' scores are lean toward the higher side (5) rather than the lower side (1).
 
 ## Part B
 
@@ -49,7 +49,7 @@ prof_nonnative <- prof %>%
   filter(native == "no")
 ```
 
-The mean evaluation score of native English speaker is `r mean(prof_native$eval)`, whereas the mean of non-native English speaker is `r round(mean(prof_nonnative$eval), 2)`. The evaluation score range of native English speaker is `r round((max(prof_native$eval)-min(prof_native$eval)), 2) `, whereas the range of non-native English speaker is `r round((max(prof_nonnative$eval)-min(prof_nonnative$eval)), 2) `.
+The two box plot compares the 25th, 50th, 75th percentile course evaluation score of native English professors and non-native English professors. The mean evaluation score of native English speaker is `r round(mean(prof_native$eval), 2)`, whereas the mean of non-native English speaker is `r round(mean(prof_nonnative$eval), 2)`. The evaluation score range of native English speaker is `r round((max(prof_native$eval)-min(prof_native$eval)), 2) `, whereas the range of non-native English speaker is `r round((max(prof_nonnative$eval)-min(prof_nonnative$eval)), 2) `. It is shown that although the median score of native English speakers are higher, the score range among native English speakers is higher comparing to non-native speakers. There are a few outliers in the native speaker group that have low rating.
 
 ## Part C
 
@@ -64,7 +64,7 @@ prof_female <- prof %>%
   filter(gender == "female")
 ```
 
-The mean evaluation score of male professors is `r round(mean(prof_male$eval), 2)`, whereas the mean of female professors is `r round(mean(prof_female$eval), 2)`. The median evaluation score of male professors is `r median(prof_male$eval)`, whereas the median of female professors is `r round(median(prof_female$eval), 2)`. 
+The two facet wrapped histogram compare the evaluation scores of female and male professors. The mean evaluation score of male professors is `r round(mean(prof_male$eval), 2)`, whereas the mean of female professors is `r round(mean(prof_female$eval), 2)`. The median evaluation score of male professors is `r median(prof_male$eval)`, whereas the median of female professors is `r round(median(prof_female$eval), 2)`. While we can see both mean and median are higher among male professors, the male professor rating skewed to the left more, whereas the female graph is less skewed, given the mean and median for female professors are approximately the same.
 
 ## Part D
 
@@ -75,7 +75,7 @@ ggplot(prof, aes(x = beauty, y = eval)) + geom_point() +
        y = "Course Evaluation Score")
 ```
 
-The correlation of physical attractiveness and course evaluation score is `r round(cor(prof$beauty, prof$eval), 2)`
+The graph showcases the correlation of physical attractiveness and course evaluation, and the correlation is `r round(cor(prof$beauty, prof$eval), 2)`, which implies that there's no significant relationship between physical attractiveness and course evaluation score.
 
 # Problem 2
 
@@ -97,7 +97,7 @@ rent_total <- bike %>%
 ggplot(rent_total, aes(x=hr, y = count)) + geom_line() + labs(title = "Average Hourly Rentals across All Hours of Day", x = "Time", y = "Rental Count")
 ```
 
-The peak average rentals occurs at 8 a.m and 5 p.m. and it aligns with the time when people enter and leave office.
+The line graph demonstrate the hourly average rental count in 24 hours. The peak average rentals occurs at 8 a.m and 5 p.m. and it aligns with the time when most people enter and leave office. On the other hand, the lowest occurs from midnight to 5 a.m., when most people are sleeping and not using the bikes that much.
 
 ## Plot B
 
@@ -110,7 +110,7 @@ rental_total_byweek <- bike %>%
 ggplot(rental_total_byweek, aes(x=hr, y = average)) + geom_line() + labs(title = "Average Hourly Rentals across All Hours of Day on Working Day or not", x = "Time", y = "Rental Count", color = "Working Day?") + facet_wrap(~workingday_yn)
 ```
 
-The peak for workdays occurs at 8 a.m. and 5 p.m. and for non-work days it's at 1 p.m.
+The two line graphs compare the hourly average rental counts on working days and non-working days. The peak for workdays occurs at 8 a.m. and 5 p.m. and for non-work days it's at 1 p.m. The peak for working days aligns with the typical time people enter and leave office, and for non-working day people use bikes around lunch time and when sun is still up.
 
 ## Plot C
 
@@ -122,7 +122,7 @@ bike_c <- bike %>%
 ggplot(bike_c, aes(x = weathersit, y = count, fill = workingday_yn)) +geom_bar(stat = 'identity') + labs(title = "Average Ridership under Different Weather Situation and Days", x = "Weather Situation", y = "Bike Rental Count", fill = "Working Day?") + facet_wrap(~workingday_yn) + scale_fill_manual(values = c("khaki2", "plum4"))
 ```
 
-On working days, approximately the same number of people use the bike on clear weather and misty weather. However, less people use the bikes on non-working days when it is misty.
+The two bar charts show the bike rental count in different weather situation and whether or not it's a working day. On working days, approximately the same number of people use the bike on clear weather and misty weather. However, less people use the bikes on non-working days when it is misty.
 
 # Problem 3
 
@@ -144,7 +144,7 @@ capmetro_avg <- capmetro %>%
 ggplot(capmetro_avg, aes(x= hour_of_day, y= avg, color = month)) + geom_line() + facet_wrap(~day_of_week) + labs(title = "Average Boarding by Days in Different Months", x= "Hour of Day", y = "Average Boardings")
 ```
 
-On weekdays, hour of peak is approximately the same. As for weekends, there are no significant peaks in both days. For September, Labor Day is on Monday so on that day there's less people using the bus so adding together there's less boarding count. For November on Wednesday, Thursday and Friday, thanksgiving occurs and people stay at home therefore use less bus. 
+The graph showcases the hourly average boardings in every day in a week coloring by months. On weekdays, hour of peak is approximately the same. As for weekends, there are no significant peaks in both days. For September, Labor Day is on Monday so on that day there's less people using the bus so adding together there's less boarding count. For November on Wednesday, Thursday and Friday, thanksgiving occurs and people stay at home therefore use less bus. 
 
 
 ## Task 2
@@ -153,7 +153,14 @@ On weekdays, hour of peak is approximately the same. As for weekends, there are 
 ggplot(capmetro, aes(x= temperature, y= boarding, color = weekend)) + geom_point() + facet_wrap(~hour_of_day)
 ```
 
-The graph shows the relationship between temperature and the number of boarding people by the hour on both weekdays and weekends. There is significantly more people using the metro on weekdays throughout the day. And temperature doesn't really affect the number of people using the bus.
+```{r}
+capmetro_cor <- capmetro %>% 
+  group_by(hour_of_day) %>% 
+  summarize(cor = cor(temperature, boarding))
+```
+
+
+The graph shows the relationship between temperature and the number of boarding people by the hour on both weekdays and weekends. There is significantly more people using the metro on weekdays throughout the day. And temperature doesn't really affect the number of people using the bus since the average correlation of temperature and boarding among all hours is `r round(mean(capmetro_cor$cor), 2)`.
 
 # Problem 4
 
@@ -196,7 +203,7 @@ billboard_diversity <- billboard %>%
 ggplot(billboard_diversity, aes(x = year, y = count)) + geom_line() + labs(title = "Unique Songs that Entered Top 100 throughout the Years")
 ```
 
-The number of unique songs reached the lowest point near 2000, and generally increase since then.
+This line graph illustrates the number of unique songs that entered Billboard top 100. The number of unique songs reached the highestpoint in 1966 with 803 different songs, and reached the lowest point in 2001 with 384 songs. Between 1966 and 2001, the number of unique songs is generally decreasing, and after 2001, it is generally increasing.
 
 ## Part C
 
@@ -218,4 +225,4 @@ billboard_tenweekhit <- billboard_weeks %>%
 ggplot(billboard_tenweekhit, aes(x=performer, y=songs)) + geom_bar(stat = "identity") + labs(title = "Artists that have over 30 Songs Reached 10 Week Hit", x = "Performer", y = "Number of Ten-Week Hit Songs") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-19 artists in the history achieved the 10 week hit on Billboard. Among all the artists, Elton John has the most songs that hit the record.
+The bar plot shows the 19 artists in the history that achieved the 10 week hit on Billboard. Among all the artists, Elton John with 52 songs on board has the most songs that hit the record.
