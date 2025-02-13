@@ -1,0 +1,198 @@
+---
+title: "homework 3"
+author: "Emma Chung"
+date: "2025-01-29"
+output:
+  pdf_document: default
+  html_document:
+    float: true
+    float_doc: true
+---
+
+Github: 
+
+```{r setup, include=FALSE, warning = FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(mosaic)
+```
+
+# Problem 1: Gas Price
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+gas <- read_csv("gasprices.csv")
+```
+
+## Gas stations charge more if they lack direct competition in sight?
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+competitor_bootstrap <- do(1000)*diffmean(Price~Competitors, data=resample(gas))
+confint(competitor_bootstrap, level = 0.95)
+```
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(competitor_bootstrap, aes(x=diffmean)) + geom_histogram() +labs(title = "Price Difference between Gas Stations with and without Competitor", x = "Difference in Gas Price", y = "frequency")
+```
+
+This hypothesis states if there's competitor in sight, the gas station will likely charge less. If we bootstrap data from the given data set, the price difference between gas stations with and without competitors in sight is somewhere between -0.054 and  0.007, with 95% confidence. In conclusion, this hypothesis is not supported by the data set.
+
+\newpage
+
+## The richer the area, the higher the gas prices?
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+gas <- gas %>% 
+  arrange(Income) %>% 
+  mutate(isRich = ifelse(row_number() <= 101/2, "Poor", "Rich"))
+rich_bootstrap <- do(10000) * diffmean(Price~isRich, data = resample(gas))
+confint(rich_bootstrap, level = 0.95)
+```
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(rich_bootstrap, aes(x=diffmean)) + geom_histogram() +labs(title = "Price Difference between Gas Stations in Richer and Poorer Areas", x = "Difference in Gas Price", y = "frequency")
+```
+
+This hypothesis states if the station is located in a richer area, the gas price will likely be higher. I arranged the data by Income and seperated the first half as richer while the later half as poorer. If we bootstrap data from the given data set, the price difference between gas stations in richer area or not is somewhere between -0.0035 and  0.0593, with 95% confidence. In conclusion, this hypothesis is not supported by the data set.
+
+\newpage
+
+## Gas stations at stoplights charge more?
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+stoplight_bootstrap <- do(10000)*diffmean(Price~Stoplight, data = resample(gas))
+confint(stoplight_bootstrap, level = 0.95)
+```
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(stoplight_bootstrap, aes(x=diffmean)) + geom_histogram() +labs(title = "Price Difference between Gas Stations near Stoplights or not", x = "Difference in Gas Price", y = "frequency")
+```
+
+This theory states if there's stoplights nearby, the gas station will likely charge more. If we bootstrap data from the given data set, the price difference between gas stations near a stoplight or not is somewhere between -0.0385 and  0.0302, with 95% confidence. In conclusion, this hypothesis is not supported by the data set.
+\newpage
+
+## Gas stations with direct highway access charge more?
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+highway_bootstrap <- do(10000)*diffmean(Price~Highway, data = resample(gas))
+confint(highway_bootstrap, level = 0.95)
+```
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(highway_bootstrap, aes(x=diffmean)) + geom_histogram() +labs(title = "Price Difference between Gas Stations near Highway or not", x = "Difference in Gas Price", y = "frequency")
+```
+
+This theory states if there's highway nearby, the gas station will likely charge more. If we bootstrap data from the given data set, the price difference between gas stations near a highwayt or not is somewhere between 0.0097 and  0.0812, with 95% confidence. In conclusion, this hypothesis is supported by the data set that gas price is higher at gas stations close to highways.
+\newpage
+
+## Shell charges more than all other non-Shell Brands
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+gas <- gas %>% 
+  mutate(isShell = ifelse(Brand == "Shell", "1", "0"))
+shell_bootstrap <- do(10000)*diffmean(Price~isShell, data = resample(gas))
+confint(shell_bootstrap, level = 0.95)
+```
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(shell_bootstrap, aes(x=diffmean)) + geom_histogram() +labs(title = "Price Difference between Shell and other Brands", x = "Difference in Gas Price", y = "frequency")
+```
+
+This hypothesis states that Shell charges more than all other non-Shell brands. If we bootstrap data from the given data set, the price difference between gas stations near a stoplight or not is somewhere between -0.0097 and 0.0656, with 95% confidence. In conclusion, this hypothesis is not supported by the data set.
+\newpage
+
+# Problem 2: S-Class Mercedes
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+sclass <- read_csv("sclass.csv")
+```
+
+## Part A
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+sclass_a <- sclass %>% 
+  filter(year == 2011 & trim == "63 AMG" & condition == "Used")
+sclass_a_bootstrap <- do(10000)*mean(~mileage, data = resample(sclass_a))
+confint(sclass_a_bootstrap, level=0.95)
+```
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(sclass_a_bootstrap, aes(x=mean)) + geom_histogram() +labs(title = "Mean Mileage among 2011 S-Class 63 AMGs", x = "Mean Mileage", y = "frequency")
+```
+
+The average mileage of 2011 S-Class 63 AMGs that were hitting the used-car market is somewhat between 26885.95 and 34739.57, with 95% confidence. 
+\newpage
+
+## Part B
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+sclass_b <- sclass %>% 
+  filter(year == 2014 & trim == "550") %>% 
+  mutate(isBlack = ifelse(color == "Black", TRUE, FALSE))
+
+sclass_b_bootstrap <- do(10000)*prop(~isBlack, data=resample(sclass_b))
+confint(sclass_b_bootstrap, level = 0.95)
+```
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+ggplot(sclass_b_bootstrap, aes(x=prop_TRUE)) + geom_histogram() + labs(title = "Proportion of Black Cars among all 2014 S-Class 550s", x = "Proportion of Black Car", y = "frequency")
+```
+
+The proportion of 2014 S-Class 550s that were painted black is somewhere between 0.4168 and 0.45275, with 95% confidence.
+\newpage
+
+# Problem 3: NBC
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+nbc_pilotsurvey <- read_csv("nbc_pilotsurvey.csv")
+```
+
+## Part A
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+nbc_a <- nbc_pilotsurvey %>% 
+  filter(Show == "Living with Ed" | Show == "My Name is Earl")
+nbc_a_bootstrap <- do(10000)*diffmean(Q1_Happy ~ Show, data = resample(nbc_a))
+confint(nbc_a_bootstrap, level = 0.95)
+```
+
+The mean viewer response of "Being Happy" is investigated among "Living with Ed" and "My Name is Earl". I bootstrapped the data set and calculated the difference in mean viewer responses to the "How happy you were when watched the show (scale from 1 to 5)?", then calculate the 95% confident interval. Result shows the difference in mean is somewhere between -0.3972 and 0.1035, with 95% confidence. In conclusion, the data set did not provide enough information for us to determine which show make viewers happier.
+
+## Part B
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+nbc_b <- nbc_pilotsurvey %>% 
+  filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
+
+nbc_b_bootstrap = do(1000)*diffmean(Q1_Annoyed~Show, data = resample(nbc_b))
+confint(nbc_b_bootstrap, data = resample(nbc_b_bootstrap))
+```
+
+The mean viewer response of "being annoyed" is investigated among "The Biggest Loser" and "The Apprentice: Los Angeles". I bootstrapped the data set and calculated the difference in mean viewer responses to the "How annoyed you were when watched the show (scale from 1 to 5)?", then calculate the 95% confident interval. Result shows the difference in mean is somewhere between -0.5153 and -0.0204, with 95% confidence. In conclusion, the data set has provide enough information to suggest that The Biggest Loser made people more annoyed when watching.
+
+## Part C
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE}
+nbc_c <- nbc_pilotsurvey %>% 
+  filter(Show == "Dancing with the Stars") %>% 
+  mutate(isConfusing = ifelse(Q2_Confusing >= 4, "1", "0"))
+
+nbc_c_bootstrap <- do(1000)*prop(~isConfusing, data = resample(nbc_c))
+confint(nbc_c_bootstrap, level = 0.95)
+```
+
+The proportion of viewer response of "being confused" is investigated in "Dancing with Stars". I bootstrapped the data set and calculated the difference in mean viewer responses to the "How annoyed you were when watched the show (scale from 1 to 5)?", then calculate the 95% confident interval. Result shows the proportion is somewhere between 0.0387 and 0.1215, with 95% confidence. In conclusion, there are not a lot of people feeling confused since if scale 1 to 5 is eveny distributed, then there will be 40% of people feeling confused (scoring 4 or 5). But there are less than 40% of people indicated that they are confused.
+\newpage
+
+# Problem 4: Ebay
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+ebay <- read_csv("ebay.csv")
+```
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE}
+ebay <- ebay %>% 
+  mutate(revenue_ratio = rev_after / rev_before)
+
+ebay_bootstrap <- do(10000)*diffmean(revenue_ratio~adwords_pause, data = resample(ebay))
+confint(ebay_bootstrap, level=0.95)
+```
+
+The difference between ratio of revenue before and after the experiment among treatment group and control group.I first calculated the ratio for each DMA and then bootstrapped, calculated the difference in ratio between treatment group and control group. Results show that the difference of revenue ratio is somewhere between -0.0923 and -0.01349, with 95% confidence. In conclusion, since treatment group has lower ratio than control group, that means the paid advertisement did drive extra revenue. 
