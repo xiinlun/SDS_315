@@ -1,0 +1,247 @@
+---
+title: "hw7"
+author: "Emma Chung"
+date: "2025-04-04"
+output: pdf_document
+---
+
+GtHub link: 
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(MatchIt)
+```
+
+# Problem 1: Armfold
+
+```{r}
+armfold <- read_csv("armfold.csv")
+```
+
+## A.
+
+```{r}
+# number of male and female in the dataset
+table(armfold$Sex)
+```
+
+```{r}
+# proportion of males with left on top
+male_left <- armfold %>% 
+  filter(Sex == "Male") %>% 
+  filter(LonR_fold == "1")
+male_left_prop <- count(male_left) / 106
+male_left_prop
+```
+
+```{r}
+# proportion of females with left on top
+female_left <- armfold %>% 
+  filter(Sex == "Female") %>% 
+  filter(LonR_fold == "1")
+female_left_prop <- count(female_left) / 111
+female_left_prop
+```
+
+## B.
+
+```{r}
+prop_diff <- male_left_prop - female_left_prop
+prop_diff
+```
+
+## C.
+
+```{r}
+# standard error for difference in proportion
+se <- sqrt((male_left_prop * (1 - male_left_prop))/106 + (female_left_prop * (1 - female_left_prop))/111)
+conf_low_95 <- prop_diff - 1.96 * se
+conf_high_95 <- prop_diff + 1.96 * se
+```
+
+The confidence interval is between `r conf_low_95` and `r conf_high_95`. The formula for difference in proportion is square root of p1(1 - p1)/N1 + p2(1 - p2)/N2. Values I pluggged in the formula are p1 = 0.08490566, p2 = 0.08108108, N1 = 106, and N2 = 111. The z value I use here is +-1.96.
+
+## D. 
+If we were to determine the difference between probability of a man has his left hand on top and probability of a woman has her left hand on top, then we would expect that if we repeat the test many times and calculate the difference in probability, 95% of time the difference of probability will be between `r conf_low_95` and `r conf_high_95`.
+
+## E,
+The standard error I calculated above present how spread out the confidence interval is.
+
+## F. 
+Sampling distribution refers to the repeated process of resample from our bigger sample dataset, from each time sampling, what will be the difference between 
+
+## G.
+normal distribution
+
+## H.
+There is not significant difference in sex in terms of armfolding, but it can be a hidden confounder that contribute to the different hands on top.
+
+## I.
+Yes. The confidence interval is calculated using the difference in proportion and standard error. Accross different groups, there will likely be different standard error or difference in proportion that leads to a different confidence interval. It should be true that the collection of all those interval should not vary too much.
+
+# Problem 2: Get out the vote
+
+```{r}
+turnout <- read_csv("turnout.csv")
+```
+
+## A.
+
+```{r}
+# proportion of those receiving a GOTV call who voted in 1998
+gotv <- turnout %>% 
+  filter(GOTV_call == 1)
+gotv_1998 <- turnout %>% 
+  filter(GOTV_call == 1) %>% 
+  filter(voted1998 == 1)
+gotv_1998_prop <- count(gotv_1998)/count(gotv)
+
+# gotv_1998_prop = 0.64778
+```
+
+```{r}
+# proportion of those not receiving a GOTV call who voted in 1998
+nogotv_1998 <- turnout %>% 
+  filter(GOTV_call == 0) %>% 
+  filter(voted1998 == 1)
+nogotv_1998_prop <- count(nogotv_1998)/count(turnout)
+nogotv_1998_prop
+```
+```{r}
+# voter turnout rates in 1998 between those who received a call and those who did not
+prop_diff_gotv <- gotv_1998_prop - nogotv_1998_prop
+prop_diff_gotv
+```
+
+```{r}
+# 95% confidence level in diiference in gotv_1998 and nogotv_1998
+se_gotv <- sqrt((gotv_1998_prop ** 2)/count(gotv_1998) + ((nogotv_1998_prop) ** 2)/count(nogotv_1998))
+conf_low_95_gotv <- prop_diff_gotv - 1.96 * se_gotv
+conf_high_95_gotv <- prop_diff_gotv + 1.96 * se_gotv
+```
+
+The 95% confidence interval will be between `r conf_low_95_gotv` and `r conf_high_95_gotv`.
+
+## B.
+
+```{r}
+# voted 1996 and received a GOTV call
+gotv_1996 <- turnout %>% 
+  filter(GOTV_call == 1) %>% 
+  filter(voted1996 == 1)
+gotv_1996_prop <- count(gotv_1998)/count(turnout)
+# gotv_1996_prop = 0.01478
+
+nogotv_1996 <- turnout %>% 
+  filter(GOTV_call == 1) %>% 
+  filter(voted1996 == 0)
+nogotv_1996_prop <- count(nogotv_1996)/count(turnout)
+# nogotv_1996_prop - 0.00656
+
+prop_diff_1996 <- gotv_1996_prop - nogotv_1996_prop
+# prop_diff_1996 = 0.0082
+
+se_1996 <- sqrt((gotv_1996_prop * (1 - gotv_1996_prop)/ count(gotv_1996)) + nogotv_1996_prop * (1 - nogotv_1996_prop)/count(nogotv_1996))
+# se_1996 = 0.0132
+conf_low_1996 <- prop_diff_1996 - 1.96 * se_1996
+conf_high_1996 <- prop_diff_1996 + 1.96 * se_1996
+
+# graphs or set of summary stats
+turnout_b <- turnout %>% 
+  mutate(GOTV_tf = ifelse(GOTV_call == 1, "No", "Yes")) %>% 
+  filter(voted1996 == "1")
+ggplot(turnout_b, aes(x = GOTV_tf)) + geom_bar(stat = "count") + labs(title = "Number of People who Voted in 1996 and did or didn't Received a GOTV Call", x = "Received a Call or not")
+```
+
+The 95% confidence interval of difference in proportion of people who voted in 1996 and received a GOTV call and people who voted in 1996 but did not receive a call is between `r conf_low_1996` and `r conf_high_1996`.
+
+```{r}
+# age and received a call?
+gotv_age <- turnout %>% 
+  filter(GOTV_call == 1) 
+gotv_age_mean <- mean(gotv_age$AGE)
+gotv_age_sd <- sd(gotv_age$AGE)
+# gotv_age_mean = 58.301
+
+nogotv_age <- turnout %>% 
+  filter(GOTV_call == 0)
+nogotv_age_mean  <- mean(nogotv_age$AGE)
+nogotv_age_sd <- sd(nogotv_age$AGE)
+# nogotv_age_mean = 49.425
+
+se_age <- sqrt(gotv_age_sd ** 2/count(gotv_age) + nogotv_age_sd ** 2/count(nogotv_age))
+conf_low_age <- (gotv_age_mean - nogotv_age_mean) - 1.96 * se_age
+conf_high_age <- (gotv_age_mean - nogotv_age_mean) + 1.96 * se_age
+
+# plot
+turnout_b2 <- turnout %>% 
+  select(GOTV_call, AGE) %>% 
+  mutate(gotv_tf = ifelse(GOTV_call == 1, "Yes", "No"))
+ggplot(turnout_b2, aes(x = gotv_tf, y = AGE)) + geom_boxplot()
+```
+
+The 95% confidence interval of difference in mean of people's age who received a GOTV call and people who did not receive a call is between `r conf_low_age` and `r conf_high_age`.
+
+```{r}
+# majority party member?
+gotv_majorpty <- turnout %>% 
+  filter(GOTV_call == 1) %>% 
+  filter(MAJORPTY == 1)
+gotv_majorpty_prop <- count(gotv_majorpty)/count(turnout)
+# gotv_majorpty_prop = 0.0183
+
+nogotv_majorpty <- turnout %>% 
+  filter(GOTV_call == 0) %>% 
+  filter(MAJORPTY == 1)
+nogotv_majorpty_prop <- count(nogotv_majorpty)/count(turnout)
+# nogotv_majorpty_prop = 0.00452
+
+se_majorpty = sqrt((gotv_majorpty_prop * (1 - gotv_majorpty_prop)/count(gotv_majorpty)) + (nogotv_majorpty_prop * (1 - nogotv_majorpty_prop)/count(nogotv_majorpty)))
+conf_low_majorpty <- (gotv_majorpty_prop - nogotv_majorpty_prop) - 1.96 * se_majorpty
+conf_high_majorpty <- (gotv_majorpty_prop - nogotv_majorpty_prop) + 1.96 * se_majorpty
+
+# plot
+turnout_b2 <- turnout %>% 
+  mutate(GOTV_tf = ifelse(GOTV_call == 1, "Yes", "No")) %>% 
+  filter(voted1996 == "1")
+ggplot(turnout_b, aes(x = GOTV_tf)) + geom_bar(stat = "count") + labs(title = "Number of People who Voted in 1996 and did or didn't Received a GOTV Call", x = "Received a Call or not")
+```
+
+The 95% confidence interval of difference in proportion of people who are majorpty and received a GOTV call and people who are majorpty but did not receive a call is between `r conf_low_majorpty` and `r conf_high_majorpty`.
+
+# C.
+
+```{r}
+# matching
+call_match = matchit(GOTV_call ~ voted1996 + AGE + MAJORPTY, data = turnout, ratio=5)
+
+# extract matching data
+call_match = match.data(call_match)
+
+# proportion of those receiving a GOTV call who voted in 1998
+gotv_1998_match <- call_match %>% 
+  filter(GOTV_call == 1) %>% 
+  filter(voted1998 == 1)
+
+gotv_1998_match_prop = count(gotv_1998_match)/count(call_match)
+# gotv_1998_match_prop = 0.108
+
+# sample proportion of those not receiving a GOTV call who voted in 1998
+nogotv_1998_match <- call_match %>% 
+  filter(GOTV_call == 0) %>% 
+  filter(voted1998 == 1)
+
+nogotv_1998_match_prop = count(nogotv_1998_match)/count(call_match)
+# nogotv_1998_match_prop = 0.474
+
+se_match = sqrt(gotv_1998_match_prop * (1 - gotv_1998_match_prop)/count(gotv_1998_match) + nogotv_1998_match_prop * (1 - nogotv_1998_match_prop)/count(nogotv_1998_match))
+# se_match = 0.0309
+
+conf_low_match = (gotv_1998_match_prop - nogotv_1998_match_prop) - 1.96 * se_match
+conf_high_match = (gotv_1998_match_prop - nogotv_1998_match_prop) + 1.96 * se_match
+```
+
+The 95% confidence interval from matched dataset of difference in proportion of people who voted in 1998 and received a GOTV call and people who did not vote in 1998 but did not receive a call is between `r conf_low_match` and `r conf_high_match`.
+
+I would conclude that receiving a GOTV will reduce the probability a person vote in the 1998 election, which is really weird because the intention of the phone call is to urge people go out and vote.
