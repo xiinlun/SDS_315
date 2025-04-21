@@ -1,0 +1,148 @@
+---
+title: "hw9"
+author: "Emma Chung (hc33293)"
+date: "2025-04-17"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+GitHub link: 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+library(tidyverse)
+library(ggplot2)
+library(mosaic)
+library(moderndive)
+library(effectsize)
+```
+
+# Problem 1: Manufacturing flaws in circuit boards
+
+```{r, echo = FALSE, message = FALSE}
+solder <- read_csv("solder.csv")
+```
+
+## Part A
+
+```{r, echo = FALSE}
+ggplot(solder, aes(x = Opening, y = skips)) + geom_bar(stat = 'identity') + labs(title = "Number of Skips among Different Size of Gun Opening", x = "Size of the Opening of Guns", y = "frequency")
+```
+
+As shown on the bar chart, the size of the opening on the solder guns will affect the number of skips - the biger the opening is, the less skips occur.
+
+```{r, echo = FALSE}
+ggplot(solder, aes(x = Solder, y = skips)) + geom_bar(stat = 'identity') + labs(title = "Number of Skips among Different Thickness of the Alloy", x = "Thickness of the Alloy", y = "frequency")
+```
+
+The thickness of the alloy is related to the number of skips - the thinner ones have more skips while the thicker ones have less skips.
+
+## B
+
+```{r, echo = FALSE}
+boot_skip = do(10000)*lm(skips ~ Solder + Opening, data = resample(solder))
+confint(boot_skip, level = 0.95)
+```
+
+## C
+
+When we compare the same solder opening size, the thinner ones will have an approximate 4.38 increase comparing the thicker ones. When we compare the same solder thickness, the M size opening will add an extra 1.38 skips comparing with the L size, whereas the S size opening will add an extra 8.77 skips.
+
+## D
+If we want the lowest skips, the recommended pair will be having a thick alloy and a L size opening on the solder.
+
+\newpage
+# Problem 2: Grocery Store Price
+
+```{r, echo = FALSE, message = FALSE}
+groceries <- read_csv("groceries.csv")
+```
+
+## A
+
+```{r, echo = FALSE}
+store_price <- groceries %>% 
+  group_by(Store) %>% 
+  summarize(
+    mean = sum(Price)/n()
+  )
+
+ggplot(store_price, aes(x = Store, y = mean)) + geom_bar(stat = 'identity') + coord_flip() + labs(title = 'Average Price Across Stores', y = 'average price (dollars)')
+```
+
+Among all the store, Whole Foods has the highest average price point, while Fiesta has the lowest. However, it will not be fair to compare the average since some stores don't sell more expensive product or vice versa, the issue will be address in the next question.
+
+## B
+
+```{r, echo = FALSE}
+product <- groceries %>% 
+  group_by(Product) %>% 
+  summarize(
+    count = n()
+  )
+
+ggplot(product, aes(x = Product, y = count)) + geom_bar(stat = 'identity') + coord_flip() + labs(title = 'Number of Stores that Sell Certain Products', x = 'Product')
+```
+
+As shown on the above graph, not every item is sold in all groceries store. Among all, carton of eggs and Horizon 2% milk carton has the highest number of stores that sell them.
+
+## C
+
+```{r, echo = FALSE, include = FALSE}
+product_type = lm(Price ~ Product + Type, data = groceries)
+get_regression_table(product_type, conf.level = 0.95)
+```
+
+Compared with ordinary grocery stores (like Albertsons, HEB, or Krogers), convenience stores charge somewhere between
+`r round(1/0.915, 2)` and `r round(1/0.413, 2)` dollars more for the same product.
+
+\newpage
+## D
+
+```{r, echo = FALSE}
+product_store = lm(Price ~ Product + Store, data = groceries)
+get_regression_table(product_store, conf.level = 0.95)
+```
+
+In this case, the baseline store is Albertsons, and the store that charges less for the same item is Walmart, it charges 0.99 less compare to the baseline. Kroger Fresh Fare is the second to last, charging 0.9 less compare to the baseline. On the other hand, Whole Foods charges 0.36 more compare to the baseline. The second expensive will be Whearsville Food Co Op, charging 0.29 more compare to the baseline.
+
+## E
+For the same product, Central Market is expected to charge 0.57 less than the baseline (Albertsons), while HEB is expected to charge 0.65 less than the baseline. The difference in between is 0.06, which I want to consider it not that significant because the most expensive in the context (Whole Foods) charges 1.35 more than the cheapest option (Walmart). My conclusion will be Central Market charges a similar amount to HEB for the same product.
+
+## F
+
+```{r, echo = FALSE}
+groceries <- groceries %>% 
+  mutate(Income10K = Income / 10000)
+
+product_income = lm(Price ~ Product + Income10K, data = groceries)
+get_regression_table(product_income, conf.level = 0.95)
+```
+
+```{r, echo = FALSE}
+standardize_parameters(product_income)
+```
+
+The resident in poorer ZIP code pay more for the same product because the estimate for the slope is - 0.014. A one-standard deviation increase in the income of a ZIP code seems to be associated with a 0.03 standard-deviation change in the price that consumers in that ZIP code expect to pay for the same product.
+
+\newpage
+# Problem 3: Redlining
+
+## A. ZIP codes with a higher percentage of minority residents tend to have more FAIR policies per 100 housing units.
+TRUE. The slope for relationship between minority percentage and FAIR policies is somewhere between 0.009 and 0.018. The r square statistics for the regression line between minority percentage and FAIR policies per 100 units is only 0.5, indicating moderate 
+
+## B. The evidence suggests an interaction effect between minority percentage and the age of the housing stock in the way that these two variables are related to the number of FAIR policies in a ZIP code.
+FALSE. the r square statistics is 0.06, indicating a weak relationship between the minority percentage and the house age. Furthermore, the slope of the regression line is somewhere between -0.116 and 0.912 with a 95% confidence, which includes zero, and indicate the uncertainty of the relationship.
+
+## C. The relationship between minority percentage and number of FAIR policies per 100 housing units is stronger in high-fire-risk ZIP codes than in low-fire-risk ZIP codes.
+FALSE. As shown in the minority:fire_riskLow section, comparing FAIR policies in higher risk area and lower risk area, the difference is somewhere 0.012 less and 0.01 more, so it is not clear that which one has the higher FAIR rate. Additionally, the p-value is 0.839, indicating a not significant correlation.
+
+## D. Even without controlling for any other variables, income “explains away” all the association between minority percentage and FAIR policy uptake.
+FALSE. Before the Income10K is added, the p-value for minority is 0, which is significant given it is less than 0.05. After the Income10K is isolated, the p-value for minority is still significant (0.041 < 0.05), therefore I will not say income explains away the association between minority and FAIR policy.
+
+## E. Minority percentage and number of FAIR policies are still associated at the ZIP code level, even after controlling for income, fire risk, and housing age.
+TRUE. The slope is being estimated to be somewhere between 0.003 and 0.014, which doesn't cross zero. And also the p-value is 0.006, which is significant considering it is lower than 0.05; therefore minority percentage and FAIR policies are still associated.
